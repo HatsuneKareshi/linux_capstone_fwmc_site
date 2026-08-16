@@ -1,0 +1,22 @@
+services:
+  db:
+    image: cibotminhminhchan/baubau-db:latest
+    container_name: db_node
+    env_file:
+      - .env
+    volumes:
+      - baubaupgSQL:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5555:5432"
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-baubau_user} -d ${POSTGRES_DB:-baubau_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  baubaupgSQL:
+    name: baubaupgSQL
+    driver: local
