@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWMC Bau Bau</title>
+    <link rel="icon" href="/static/favicon_16.png">
+
+    <style>
+        /* ==========================================================================
+   TOP-RIGHT RECENT STATS BADGE
+   ========================================================================== */
+        #recent-stats {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+            padding: 8px 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+            /* Dual Accent Border */
+            border-top: 3px solid var(--fuwawa-blue);
+            border-left: 3px solid var(--fuwawa-blue);
+            border-bottom: 3px solid var(--mococo-pink);
+            border-right: 3px solid var(--mococo-pink);
+
+            z-index: 10;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #666;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #222;
+            margin-top: 2px;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #ddd;
+        }
+
+        /* ==========================================================================
+           1. GLOBAL STYLES & CSS VARIABLES
+           ========================================================================== */
+        :root {
+            --fuwamoco-blond: #f9f3eb;
+            --fuwawa-blue: #8fdfff;
+            --fuwawa-dark-blue: #3d9ec5;
+            --mococo-pink: #f78dbd;
+            --mococo-dark-pink: #b33f73;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           2. BACKGROUND & LAYOUT
+           ========================================================================== */
+        .App {
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .App::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: -1;
+            transform: rotate(30deg);
+            background-image:
+                repeating-conic-gradient(var(--fuwamoco-blond) 0 25%, #0000 0 50%),
+                linear-gradient(60deg, var(--fuwawa-blue) 30%, var(--mococo-pink) 70%);
+            background-repeat: repeat, no-repeat;
+            background-size: 90px 90px, auto;
+        }
+
+        #content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        /* ==========================================================================
+           3. UI COMPONENTS
+           ========================================================================== */
+        /* Top Banner Message */
+        #message {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            padding: 10px;
+            width: fit-content;
+            text-align: center;
+            white-space: pre-wrap;
+            background-color: #fff;
+            border-top: 5px solid var(--fuwawa-blue);
+            border-left: 5px solid var(--fuwawa-blue);
+            border-bottom: 5px solid var(--mococo-pink);
+            border-right: 5px solid var(--mococo-pink);
+        }
+
+        /* Global Click Counter */
+        #global-bau-counter {
+            font-size: 5em;
+            margin-bottom: 0;
+            font-weight: bold;
+        }
+
+        #global-bau-counter-label {
+            margin-top: 5px;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* ==========================================================================
+           4. CLICKABLE TWINS & ANIMATIONS
+           ========================================================================== */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+
+        #fuwawa,
+        #mococo {
+            position: relative;
+            width: 128px;
+            height: 128px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .animated-image {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            object-fit: cover;
+            opacity: 0;
+        }
+
+        .animated-image.front {
+            opacity: 1;
+        }
+
+        /* Animation Trigger Classes (Toggled via JS) */
+        #fuwawa-default.play-bau-bau,
+        #mococo-default.play-bau-bau {
+            animation: bau-bau-front 1.2s;
+        }
+
+        #fuwawa-bau.play-bau-bau,
+        #mococo-bau.play-bau-bau {
+            animation: bau-bau-back 1.2s;
+        }
+
+        @keyframes bau-bau-front {
+            0% {
+                opacity: 1;
+            }
+
+            1% {
+                opacity: 0;
+            }
+
+            35% {
+                opacity: 0;
+            }
+
+            36% {
+                opacity: 1;
+            }
+
+            40% {
+                opacity: 1;
+            }
+
+            41% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes bau-bau-back {
+            0% {
+                opacity: 0;
+            }
+
+            1% {
+                opacity: 1;
+            }
+
+            35% {
+                opacity: 1;
+            }
+
+            36% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 0;
+            }
+
+            41% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* ==========================================================================
+           5. FOOTER & LINKS
+           ========================================================================== */
+        #subscribe {
+            margin-top: 30px;
+            font-weight: bold;
+        }
+
+        #subscribe a {
+            color: var(--mococo-dark-pink);
+            text-decoration: underline;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .footer-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding-bottom: 10px;
+            padding-right: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="App">
+
+        <!-- [SECTION: TOP BANNER] -->
+
+        <!-- [SECTION: RECENT STATS BADGE] -->
+        <div id="recent-stats">
+            <div class="stat-item">
+                <span class="stat-label">LAST 15M</span>
+                <span id="stat-15m" class="stat-value">0</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">LAST 1H</span>
+                <span id="stat-1h" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <div id="message">
+            <p style="margin: 0;">BAU BAU to tune in to global baus!</p>
+        </div>
+
+        <!-- [SECTION: MAIN CONTENT AREA] -->
+        <div id="content">
+
+            <!-- [SECTION: COUNTER DISPLAY] -->
+            <!-- Your app.js should update the innerText of this element -->
+            <p id="global-bau-counter">0</p>
+            <p id="global-bau-counter-label">GLOBAL BAU COUNTER</p>
+
+            <!-- [SECTION: CLICKABLE BUTTONS] -->
+            <div class="button-container">
+
+                <!-- FUWAWA CLICKABLE TARGET -->
+                <div id="fuwawa">
+                    <img id="fuwawa-bau" src="/static/images/fuwawa_bau_128.png" alt="fuwawa-bau"
+                        class="animated-image">
+                    <img id="fuwawa-default" src="/static/images/fuwawa_128.png" alt="fuwawa"
+                        class="animated-image front">
+                </div>
+
+                <!-- MOCOCO CLICKABLE TARGET -->
+                <div id="mococo">
+                    <img id="mococo-bau" src="/static/images/mococo_bau_128.png" alt="mococo-bau"
+                        class="animated-image">
+                    <img id="mococo-default" src="/static/images/mococo_128.png" alt="mococo"
+                        class="animated-image front">
+                </div>
+
+            </div>
+
+            <!-- [SECTION: YOUTUBE LINK] -->
+            <p id="subscribe">
+                Subscribe to <a href="https://www.youtube.com/@FUWAMOCOch" target="_blank">FUWAMOCO Ch. hololive-EN</a>
+            </p>
+        </div>
+
+        <!-- [SECTION: FOOTER] -->
+        <footer>
+            <button class="footer-button">About</button>
+        </footer>
+
+    </div>
+
+    <!-- [SECTION: FRONTEND JAVASCRIPT] -->
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

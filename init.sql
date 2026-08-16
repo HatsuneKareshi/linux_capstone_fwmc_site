@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS "baubau_table" (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_mocochan BOOLEAN
+);
