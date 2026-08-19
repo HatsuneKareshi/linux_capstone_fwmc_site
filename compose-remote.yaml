@@ -3,7 +3,7 @@ services:
     image: cibotminhminhchan/baubau-db:latest
     container_name: db_node
     env_file:
-      - .env
+      - .env.db
     volumes:
       - baubaupgSQL:/var/lib/postgresql/data
     ports:
