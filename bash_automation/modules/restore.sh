@@ -175,11 +175,15 @@ restore_files() {
 }
 
 proof() {
-    local count
+    local count http
     count="$($DOCKER exec "$CTR" psql -U "$PGUSER" -d "$DB" -Atc 'SELECT count(*) FROM "baubau_table"' | head -1)"
     log "proof: rows in baubau_table = ${count}"
-    local http
-    http="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://127.0.0.1/ || true)"
+    http=""
+    for _ in 1 2 3 4 5; do
+        http="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1/ || true)"
+        [ "$http" = "200" ] && break
+        sleep 3
+    done
     log "proof: HTTP through nginx = ${http}"
     [ "$count" -ge 0 ] 2>/dev/null || die "database proof failed"
     [ "$http" = "200" ] || log "WARN: expected HTTP 200, got ${http}"
@@ -196,12 +200,13 @@ do_restore() {
     # 2. load credentials
     if [ -f "${APP_DIR}/.env.db" ]; then
         log "Found .env.db, loading credentials..."
+        # shellcheck source=/dev/null
         source "${APP_DIR}/.env.db"
         # update these things
         PGUSER="${POSTGRES_USER}"
         DB="${POSTGRES_DB}"
     else
-        die "Warninng: ${APP_DIR}/.env.db! not found"
+        die "Warning: ${APP_DIR}/.env.db! not found"
     fi
 
     log "Starting db_node via docker compose..."
@@ -319,5 +324,3 @@ while true; do
         *) echo "invalid choice - try again" ;;
     esac
 done
-
-## the smollest

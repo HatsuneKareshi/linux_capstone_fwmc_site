@@ -120,6 +120,7 @@ preflight() {
         die "CRITICAL: ${APP_DIR}/.env.db is missing! Aborting backup."
     fi
 
+    # shellcheck source=/dev/null
     source "${APP_DIR}/.env.db"
     DB="${POSTGRES_DB}"
     PGUSER="${POSTGRES_USER}"
@@ -235,6 +236,3 @@ retention
 guards
 push
 log "==================== backup complete ===================="
-
-
-## are the bravest
