@@ -77,6 +77,5 @@ async def ping(db: Session = Depends(get_db)):
         bau_within_last_1h=cnt_last_1h,
     )
 
-print(0 / 0)
 
 uvicorn.run(app, host="127.0.0.1", port=8000) # log_level="warning"
